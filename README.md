@@ -120,7 +120,7 @@ that once:
 ```
 
 The data plane (the `/v1` API your apps call) is on port 8080, the admin plane (the Admin API and
-the console) on 8081. `npx` downloads the release binary for Linux or macOS once, checks its
+the console) on 8081. `npx` downloads the release binary for Linux, macOS or Windows once, checks its
 SHA-256 and keeps the gateway's data in `~/.antirion`; the container keeps it in
 `/var/lib/antirion` (add `-v antirion-data:/var/lib/antirion` to keep it across containers).
 `npx -y antirion --help` lists the ports, the data directory and the other settings.
@@ -249,8 +249,8 @@ kubectl get secret antirion-keys -o jsonpath='{.data.bootstrap-token}' | base64 
 
 ### Binaries
 
-Every release has the binary for Linux (glibc 2.36 or later) and macOS, on amd64 and arm64, at
-`https://github.com/eliasbiondo/antirion/releases`, as `antirion-<tag>-<os>-<arch>.tar.gz` with
+Every release has the binary for Linux (glibc 2.36 or later), macOS and Windows, on amd64 and arm64,
+at `https://github.com/eliasbiondo/antirion/releases`, as `antirion-<tag>-<os>-<arch>.tar.gz` with
 `antirion-<tag>-sha256sums.txt`. `npx -y antirion` downloads the one for your machine; to install it
 yourself, unpack it anywhere on your `PATH` and run `antirion`.
 

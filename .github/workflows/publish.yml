@@ -149,7 +149,7 @@ jobs:
           cosign verify-blob --bundle "$sums.sigstore.json" \
             --certificate-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/release.yml@refs/tags/$TAG" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com "$sums"
-          for platform in linux-amd64 linux-arm64 darwin-amd64 darwin-arm64; do
+          for platform in linux-amd64 linux-arm64 darwin-amd64 darwin-arm64 windows-amd64 windows-arm64; do
             grep -q " antirion-$TAG-$platform.tar.gz\$" "$sums" || { echo "::error::$sums lists no $platform archive"; exit 1; }
           done
           cp "$sums" npm/checksums.txt

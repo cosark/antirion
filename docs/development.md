@@ -1819,7 +1819,8 @@ What the Cache screen reads and changes beyond the cache's own rules.
   paths remapped, `-ffile-prefix-map` for C code and, on macOS, `-oso_prefix` for the object paths the
   linker records; it compares the outputs. Locally, check a small package (`--package xtask --bin xtask`
   or `--package antirion-json --lib`); the full gateway is checked by the release workflow, in its pinned
-  container, before the release build (which uses the same settings). The console export takes
+  container, before the Linux release build (which uses the same settings); on macOS the check runs
+  beside the release build and reports without blocking it. The console export takes
   `ANTIRION_BUILD_COMMIT` as its build id.
 
 ## Known gaps of the API surface, identity and tooling

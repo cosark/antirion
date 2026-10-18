@@ -41,7 +41,7 @@ Compose, below). Later starts print where the token is kept instead of the token
 (`docker cp <container>:/var/lib/antirion/data/bootstrap-token - | tar -xO` reads it).
 
 `npx -y antirion` downloads the release binary for your platform (Linux with glibc 2.36 or later,
-or macOS, on x64 or arm64) on its first run, checks its SHA-256 against the release's checksums and
+macOS or Windows, on x64 or arm64) on its first run, checks its SHA-256 against the release's checksums and
 keeps it in `~/.cache/antirion/<version>/`; arguments go to the binary. Running the binary with no
 arguments, or `antirion serve` without `--config`, does the same. These flags, or the variables
 next to them, change it:

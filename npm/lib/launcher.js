@@ -18,7 +18,7 @@ const RELEASES = 'https://github.com/eliasbiondo/antirion/releases/download';
 const PACKAGE_DIR = path.join(__dirname, '..');
 // The release binaries are built on Debian 12.
 const MIN_GLIBC = [2, 36];
-const SUPPORTED = 'Linux (glibc 2.36 or later) and macOS, on x64 or arm64';
+const SUPPORTED = 'Linux (glibc 2.36 or later), macOS and Windows, on x64 or arm64';
 const DOCKER = 'docker run -p 8080:8080 -p 8081:8081 eliasbiondo/antirion';
 
 class LaunchError extends Error {}
@@ -26,7 +26,7 @@ class LaunchError extends Error {}
 /** The release's name for this platform, such as `darwin-arm64`; throws on any other platform. */
 function target(platform, arch, glibc) {
     const archName = { x64: 'amd64', arm64: 'arm64' }[arch];
-    const osName = { darwin: 'darwin', linux: 'linux' }[platform];
+    const osName = { darwin: 'darwin', linux: 'linux', win32: 'windows' }[platform];
     if (!archName || !osName) {
         throw new LaunchError(
             `there is no Antirion binary for ${platform} on ${arch}: the releases cover ${SUPPORTED}. ` +
@@ -58,6 +58,11 @@ function glibcVersion() {
     } catch {
         return undefined;
     }
+}
+
+/** The binary's file name in the archive and the cache: `antirion.exe` on Windows. */
+function binaryName(platform) {
+    return platform === 'win32' ? 'antirion.exe' : 'antirion';
 }
 
 function archiveName(version, platform) {
@@ -235,11 +240,13 @@ async function ensureBinary(opts) {
     const env = opts.env || process.env;
     const log = opts.log || ((line) => process.stderr.write(`${line}\n`));
     if (env.ANTIRION_BINARY) return env.ANTIRION_BINARY;
+    const system = opts.platform || process.platform;
+    const name = binaryName(system);
     const dir = path.join(cacheRoot(env), opts.version);
-    const binary = path.join(dir, 'antirion');
+    const binary = path.join(dir, name);
     if (fs.existsSync(binary)) return binary;
 
-    const platform = target(opts.platform || process.platform, opts.arch || process.arch, opts.glibc);
+    const platform = target(system, opts.arch || process.arch, opts.glibc);
     const base = (env.ANTIRION_DOWNLOAD_URL || RELEASES).replace(/\/+$/, '');
     const release = `${base}/v${opts.version}`;
     const archive = archiveName(opts.version, platform);
@@ -258,7 +265,7 @@ async function ensureBinary(opts) {
             `${archive} does not match its SHA-256 checksum (expected ${expected}, got ${actual})`,
         );
     }
-    const executable = extractFile(zlib.gunzipSync(bytes), 'antirion');
+    const executable = extractFile(zlib.gunzipSync(bytes), name);
     fs.mkdirSync(dir, { recursive: true });
     const partial = path.join(dir, `.antirion-${process.pid}-${crypto.randomBytes(4).toString('hex')}`);
     try {
@@ -307,6 +314,7 @@ async function main(args) {
 module.exports = {
     LaunchError,
     archiveName,
+    binaryName,
     download,
     ensureBinary,
     extractFile,

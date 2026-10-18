@@ -111,17 +111,25 @@ after(() => {
 });
 
 describe('platforms', () => {
-    test('macOS and glibc Linux on x64 and arm64 have a binary', () => {
+    test('macOS, Windows and glibc Linux on x64 and arm64 have a binary', () => {
         assert.equal(launcher.target('darwin', 'arm64'), 'darwin-arm64');
+        assert.equal(launcher.target('win32', 'x64'), 'windows-amd64');
+        assert.equal(launcher.target('win32', 'arm64'), 'windows-arm64');
         assert.equal(launcher.target('darwin', 'x64'), 'darwin-amd64');
         assert.equal(launcher.target('linux', 'x64', '2.36'), 'linux-amd64');
         assert.equal(launcher.target('linux', 'arm64', '2.39'), 'linux-arm64');
         assert.equal(launcher.target('linux', 'x64', '3.0'), 'linux-amd64');
     });
 
+    test('the Windows binary is antirion.exe', () => {
+        assert.equal(launcher.binaryName('win32'), 'antirion.exe');
+        assert.equal(launcher.binaryName('darwin'), 'antirion');
+        assert.equal(launcher.binaryName('linux'), 'antirion');
+    });
+
     test('anything else is refused with a reason and the container as the way out', () => {
         for (const [platform, arch, glibc, words] of [
-            ['win32', 'x64', undefined, /no Antirion binary for win32/],
+            ['win32', 'ia32', undefined, /no Antirion binary for win32 on ia32/],
             ['linux', 'ia32', '2.36', /no Antirion binary for linux on ia32/],
             ['freebsd', 'x64', undefined, /no Antirion binary/],
             ['linux', 'x64', undefined, /no glibc/],

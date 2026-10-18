@@ -32,8 +32,8 @@ binary of the package's version for your platform from the
 checksums published with the package, and keeps it in `~/.cache/antirion/<version>/`
 (`$XDG_CACHE_HOME/antirion` when that is set). Later runs start the cached binary at once.
 
-It runs on Linux with glibc 2.36 or later (Debian 12, Ubuntu 24.04 and newer) and on macOS, on x64
-and arm64, with Node.js 18 or later. Elsewhere, run the container image:
+It runs on Linux with glibc 2.36 or later (Debian 12, Ubuntu 24.04 and newer), macOS and Windows, on
+x64 and arm64, with Node.js 18 or later. Elsewhere, run the container image:
 
 ```bash
 docker run -p 8080:8080 -p 8081:8081 eliasbiondo/antirion
