@@ -220,6 +220,43 @@ jobs:
           path: target/release/antirion
           retention-days: 7
 
+  # The gateway on Windows (x64 and arm64): it builds, starts with no configuration and passes its
+  # own health check.
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [windows-2025, windows-11-arm]
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Rust toolchain
+        run: |
+          if ! command -v rustup >/dev/null; then
+            curl -sSfL -o rustup-init.exe "https://static.rust-lang.org/rustup/dist/$(uname -m | sed 's/arm64/aarch64/;s/x86_64/x86_64/')-pc-windows-msvc/rustup-init.exe"
+            ./rustup-init.exe -y --default-toolchain none --profile minimal
+            echo "$USERPROFILE/.cargo/bin" >> "$GITHUB_PATH"
+          fi
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - run: cargo build --locked -p antirion
+      - name: Starts with no configuration and passes its health check
+        run: |
+          target/debug/antirion.exe version
+          target/debug/antirion.exe serve > serve.log 2>&1 &
+          for _ in $(seq 1 60); do
+            if target/debug/antirion.exe healthcheck; then exit 0; fi
+            sleep 1
+          done
+          cat serve.log
+          exit 1
+
   sbom:
     runs-on: ubuntu-24.04
     permissions:

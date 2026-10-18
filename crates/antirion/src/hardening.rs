@@ -1,8 +1,7 @@
 //! Process hardening, before any secret is read: no core dumps and, on Linux, a process that is not
 //! dumpable (so another process of the same user cannot read its memory through `ptrace` or
-//! `/proc`), unless `ANTIRION_ALLOW_CORE_DUMPS=1`.
-
-use rustix::process::{Resource, Rlimit, setrlimit};
+//! `/proc`), unless `ANTIRION_ALLOW_CORE_DUMPS=1`. Windows has no core-dump limit to set: its crash
+//! dumps are the system's Windows Error Reporting settings.
 
 /// The variable that keeps core dumps on, for debugging.
 const ALLOW: &str = "ANTIRION_ALLOW_CORE_DUMPS";
@@ -12,6 +11,13 @@ pub(crate) fn harden() {
         tracing::warn!("{ALLOW}=1: core dumps stay enabled and may contain secrets");
         return;
     }
+    #[cfg(unix)]
+    disable_core_dumps();
+}
+
+#[cfg(unix)]
+fn disable_core_dumps() {
+    use rustix::process::{Resource, Rlimit, setrlimit};
     let none = Rlimit {
         current: Some(0),
         maximum: Some(0),
@@ -35,7 +41,7 @@ pub(crate) fn report_unlocked_secrets() {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod tests {
     #[test]
     fn core_dumps_are_off_after_hardening() {
